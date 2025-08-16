@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+
+{% block title %}ניתוח טכני - {{ symbol }} - מעקב מניות{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">
+                    <i class="fas fa-chart-line me-2"></i>
+                    ניתוח טכני - {{ symbol }}
+                </h2>
+                <p class="text-muted mb-0">{{ data.index[-1].strftime('%d/%m/%Y') }}</p>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-right me-2"></i>
+                חזרה ללוח בקרה
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Current Price and Recommendation -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-2">מחיר נוכחי</h6>
+                <h3 class="fw-bold text-primary mb-2">${{ "%.2f"|format(data['Close'].iloc[-1]) }}</h3>
+                {% set change = data['Close'].iloc[-1] - data['Close'].iloc[-2] %}
+                {% set change_percent = (change / data['Close'].iloc[-2]) * 100 %}
+                <span class="badge {% if change >= 0 %}bg-success{% else %}bg-danger{% endif %} fs-6">
+                    {{ change|round(2) }} ({{ change_percent|round(2) }}%)
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-2">המלצה</h6>
+                <h3 class="fw-bold 
+                    {% if recommendation.recommendation == 'קנייה' %}text-success
+                    {% elif recommendation.recommendation == 'מכירה' %}text-danger
+                    {% else %}text-warning{% endif %} mb-2">
+                    {{ recommendation.recommendation }}
+                </h3>
+                <span class="badge bg-secondary fs-6">ביטחון: {{ recommendation.confidence }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-2">RSI</h6>
+                <h3 class="fw-bold 
+                    {% if indicators.rsi.iloc[-1] < 30 %}text-success
+                    {% elif indicators.rsi.iloc[-1] > 70 %}text-danger
+                    {% else %}text-warning{% endif %} mb-2">
+                    {{ "%.1f"|format(indicators.rsi.iloc[-1]) }}
+                </h3>
+                <span class="badge bg-info fs-6">מתנד</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Technical Chart -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-area me-2"></i>
+                    גרף טכני
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="technicalChart" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Details -->
+<div class="row">
+    <!-- Technical Indicators -->
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    אינדיקטורים טכניים
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">RSI:</span>
+                            <strong>{{ "%.1f"|format(indicators.rsi.iloc[-1]) }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">MACD:</span>
+                            <strong>{{ "%.2f"|format(indicators.macd.iloc[-1]) }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">SMA 20:</span>
+                            <strong>${{ "%.2f"|format(indicators.sma_20.iloc[-1]) }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">SMA 50:</span>
+                            <strong>${{ "%.2f"|format(indicators.sma_50.iloc[-1]) }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">EMA 12:</span>
+                            <strong>${{ "%.2f"|format(indicators.ema_12.iloc[-1]) }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">EMA 26:</span>
+                            <strong>${{ "%.2f"|format(indicators.ema_26.iloc[-1]) }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Fibonacci Levels -->
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="fas fa-percentage me-2"></i>
+                    רמות פיבונצי
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for level, price in recommendation.fibonacci_levels.items() %}
+                    <div class="col-6 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">{{ level }}:</span>
+                            <strong>${{ "%.2f"|format(price) }}</strong>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trading Signals -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    אותות מסחר
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recommendation.signals %}
+                <div class="row">
+                    {% for signal in recommendation.signals %}
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-arrow-right text-primary me-2"></i>
+                            <span>{{ signal }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">אין אותות מסחר ברורים כרגע</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Charts -->
+<div class="row mt-4">
+    <!-- RSI Chart -->
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    RSI
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="rsiChart" style="height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MACD Chart -->
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    MACD
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="macdChart" style="height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Main Technical Chart
+const chartData = {{ chart_json | safe }};
+Plotly.newPlot('technicalChart', chartData.data, chartData.layout, {responsive: true});
+
+// RSI Chart
+const rsiData = [{
+    x: {{ data.index.strftime('%Y-%m-%d').tolist() | tojson }},
+    y: {{ indicators.rsi.dropna().tolist() | tojson }},
+    type: 'scatter',
+    mode: 'lines',
+    name: 'RSI',
+    line: {color: '#6366f1'}
+}];
+
+const rsiLayout = {
+    title: 'RSI Indicator',
+    xaxis: {title: 'תאריך'},
+    yaxis: {title: 'RSI'},
+    shapes: [
+        {type: 'line', x0: {{ data.index[0].strftime('%Y-%m-%d') | tojson }}, x1: {{ data.index[-1].strftime('%Y-%m-%d') | tojson }}, y0: 70, y1: 70, line: {color: 'red', dash: 'dash'}},
+        {type: 'line', x0: {{ data.index[0].strftime('%Y-%m-%d') | tojson }}, x1: {{ data.index[-1].strftime('%Y-%m-%d') | tojson }}, y0: 30, y1: 30, line: {color: 'green', dash: 'dash'}}
+    ],
+    annotations: [
+        {x: {{ data.index[-1].strftime('%Y-%m-%d') | tojson }}, y: 70, text: 'Overbought', showarrow: false, xanchor: 'right'},
+        {x: {{ data.index[-1].strftime('%Y-%m-%d') | tojson }}, y: 30, text: 'Oversold', showarrow: false, xanchor: 'right'}
+    ]
+};
+
+Plotly.newPlot('rsiChart', rsiData, rsiLayout, {responsive: true});
+
+// MACD Chart
+const macdData = [
+    {
+        x: {{ data.index.strftime('%Y-%m-%d').tolist() | tojson }},
+        y: {{ indicators.macd.dropna().tolist() | tojson }},
+        type: 'scatter',
+        mode: 'lines',
+        name: 'MACD',
+        line: {color: '#3b82f6'}
+    },
+    {
+        x: {{ data.index.strftime('%Y-%m-%d').tolist() | tojson }},
+        y: {{ indicators.macd_signal.dropna().tolist() | tojson }},
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Signal',
+        line: {color: '#ef4444'}
+    }
+];
+
+const macdLayout = {
+    title: 'MACD Indicator',
+    xaxis: {title: 'תאריך'},
+    yaxis: {title: 'MACD'},
+    showlegend: true
+};
+
+Plotly.newPlot('macdChart', macdData, macdLayout, {responsive: true});
+</script>
+{% endblock %}
