@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}מעקב מניות - דף הבית{% endblock %}
+
+{% block content %}
+<div class="row align-items-center min-vh-75">
+    <div class="col-lg-6">
+        <h1 class="display-4 fw-bold text-primary mb-4">
+            <i class="fas fa-chart-line me-3"></i>
+            מעקב מניות מקצועי
+        </h1>
+        <p class="lead mb-4">
+            אפליקציה מתקדמת למעקב וניתוח מניות עם כלים טכניים מקצועיים, 
+            המלצות קנייה ומכירה, וסקירת שווקים בזמן אמת.
+        </p>
+        
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-chart-candlestick text-success me-3 fs-4"></i>
+                    <div>
+                        <h6 class="mb-1">ניתוח טכני מתקדם</h6>
+                        <small class="text-muted">RSI, MACD, פיבונצי, Bollinger Bands</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-lightbulb text-warning me-3 fs-4"></i>
+                    <div>
+                        <h6 class="mb-1">המלצות חכמות</h6>
+                        <small class="text-muted">קנייה, מכירה או החזקה</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-globe text-info me-3 fs-4"></i>
+                    <div>
+                        <h6 class="mb-1">נתונים בזמן אמת</h6>
+                        <small class="text-muted">מ-Yahoo Finance ו-Investing.com</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-shield-alt text-danger me-3 fs-4"></i>
+                    <div>
+                        <h6 class="mb-1">אבטחה מלאה</h6>
+                        <small class="text-muted">הגנה על הנתונים שלך</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4 me-md-2">
+                <i class="fas fa-user-plus me-2"></i>
+                התחל עכשיו
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg px-4">
+                <i class="fas fa-sign-in-alt me-2"></i>
+                התחברות
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-4">
+                <h5 class="card-title text-center mb-4">
+                    <i class="fas fa-chart-area me-2"></i>
+                    דוגמה לניתוח טכני
+                </h5>
+                
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="text-success mb-1">AAPL</h4>
+                            <small class="text-muted">Apple Inc.</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="text-danger mb-1">TSLA</h4>
+                            <small class="text-muted">Tesla Inc.</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="text-primary mb-1">MSFT</h4>
+                            <small class="text-muted">Microsoft Corp.</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="text-warning mb-1">GOOGL</h4>
+                            <small class="text-muted">Alphabet Inc.</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <div class="d-inline-block p-3 bg-success bg-opacity-10 rounded">
+                        <i class="fas fa-arrow-up text-success me-2"></i>
+                        <span class="text-success fw-bold">קנייה מומלצת</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section class="py-5 mt-5">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h2 class="fw-bold">תכונות מתקדמות</h2>
+            <p class="lead text-muted">כל הכלים שאתה צריך לניתוח מניות מקצועי</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-chart-line text-primary fs-2"></i>
+                    </div>
+                    <h5 class="card-title">ניתוח טכני</h5>
+                    <p class="card-text text-muted">
+                        ניתוח מתקדם עם אינדיקטורים טכניים: RSI, MACD, ממוצעים נעים, 
+                        רמות פיבונצי ו-Bollinger Bands.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-lightbulb text-success fs-2"></i>
+                    </div>
+                    <h5 class="card-title">המלצות חכמות</h5>
+                    <p class="card-text text-muted">
+                        מערכת המלצות אוטומטית המבוססת על ניתוח טכני מתקדם 
+                        עם רמות ביטחון ברורות.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-globe text-info fs-2"></i>
+                    </div>
+                    <h5 class="card-title">נתונים בזמן אמת</h5>
+                    <p class="card-text text-muted">
+                        מידע מעודכן מ-Yahoo Finance ו-Investing.com 
+                        עם גרפים אינטראקטיביים ומעקב שווקים.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

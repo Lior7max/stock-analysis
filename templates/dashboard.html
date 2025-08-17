@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}לוח בקרה - מעקב מניות{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary text-white border-0">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="mb-2">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            ברוך הבא, {{ current_user.username }}!
+                        </h2>
+                        <p class="mb-0 opacity-75">
+                            עקב אחרי המניות שלך וקבל המלצות מקצועיות
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addStockModal">
+                            <i class="fas fa-plus me-2"></i>
+                            הוסף מניה
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Market Overview -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h3 class="mb-3">
+            <i class="fas fa-globe me-2"></i>
+            סקירת שווקים - ארה"ב
+        </h3>
+    </div>
+    
+    {% if market %}
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-2">S&P 500</h6>
+                <h4 class="fw-bold mb-1">{{ market['^GSPC'].price|round(2) }}</h4>
+                <span class="badge {% if market['^GSPC'].change >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                    {{ market['^GSPC'].change|round(2) }} ({{ market['^GSPC'].change_percent|round(2) }}%)
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-2">Dow Jones</h6>
+                <h4 class="fw-bold mb-1">{{ market['^DJI'].price|round(2) }}</h4>
+                <span class="badge {% if market['^DJI'].change >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                    {{ market['^DJI'].change|round(2) }} ({{ market['^DJI'].change_percent|round(2) }}%)
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-2">NASDAQ</h6>
+                <h4 class="fw-bold mb-1">{{ market['^IXIC'].price|round(2) }}</h4>
+                <span class="badge {% if market['^IXIC'].change >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                    {{ market['^IXIC'].change|round(2) }} ({{ market['^IXIC'].change_percent|round(2) }}%)
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-2">VIX</h6>
+                <h4 class="fw-bold mb-1">{{ market['^VIX'].price|round(2) }}</h4>
+                <span class="badge {% if market['^VIX'].change >= 0 %}bg-danger{% else %}bg-success{% endif %}">
+                    {{ market['^VIX'].change|round(2) }} ({{ market['^VIX'].change_percent|round(2) }}%)
+                </span>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            לא ניתן לטעון נתוני שווקים כרגע
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Portfolio Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>
+                <i class="fas fa-briefcase me-2"></i>
+                תיק המניות שלך
+            </h3>
+            <span class="badge bg-primary fs-6">{{ stocks|length }} מניות</span>
+        </div>
+    </div>
+    
+    {% if stocks %}
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>סימול</th>
+                                <th>שם החברה</th>
+                                <th>כמות</th>
+                                <th>מחיר ממוצע</th>
+                                <th>מחיר נוכחי</th>
+                                <th>רווח/הפסד</th>
+                                <th>פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody id="portfolioTable">
+                            {% for stock in stocks %}
+                            <tr data-symbol="{{ stock.symbol }}">
+                                <td>
+                                    <strong>{{ stock.symbol }}</strong>
+                                </td>
+                                <td>{{ stock.name }}</td>
+                                <td>{{ stock.quantity }}</td>
+                                <td>${{ "%.2f"|format(stock.avg_price) }}</td>
+                                <td class="current-price">טוען...</td>
+                                <td class="profit-loss">טוען...</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('analyze_stock', symbol=stock.symbol) }}" 
+                                           class="btn btn-outline-primary" title="ניתוח טכני">
+                                            <i class="fas fa-chart-line"></i>
+                                        </a>
+                                        <a href="{{ url_for('delete_stock', stock_id=stock.id) }}" 
+                                           class="btn btn-outline-danger" title="מחק"
+                                           onclick="return confirm('האם אתה בטוח שברצונך למחוק מניה זו?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-briefcase text-muted fs-1 mb-3"></i>
+                <h5 class="text-muted mb-3">אין לך מניות בתיק עדיין</h5>
+                <p class="text-muted mb-4">הוסף מניות ראשונות כדי להתחיל לעקוב אחרי התיק שלך</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStockModal">
+                    <i class="fas fa-plus me-2"></i>
+                    הוסף מניה ראשונה
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Stock Modal -->
+<div class="modal fade" id="addStockModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>
+                    הוסף מניה חדשה
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_stock') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="symbol" class="form-label">סימול מניה</label>
+                        <input type="text" class="form-control" id="symbol" name="symbol" 
+                               placeholder="לדוגמה: AAPL" required>
+                        <div class="form-text">הכנס את הסימול של המניה (לדוגמה: AAPL, TSLA, MSFT)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">כמות מניות</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" 
+                               step="0.01" min="0" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="avg_price" class="form-label">מחיר ממוצע לרכישה</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="avg_price" name="avg_price" 
+                                   step="0.01" min="0" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>
+                        הוסף מניה
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Update portfolio data every 30 seconds
+function updatePortfolioData() {
+    const rows = document.querySelectorAll('#portfolioTable tr[data-symbol]');
+    
+    rows.forEach(row => {
+        const symbol = row.getAttribute('data-symbol');
+        const currentPriceCell = row.querySelector('.current-price');
+        const profitLossCell = row.querySelector('.profit-loss');
+        
+        fetch(`/api/stock_data/${symbol}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    currentPriceCell.textContent = 'שגיאה';
+                    profitLossCell.textContent = 'שגיאה';
+                    return;
+                }
+                
+                const currentPrice = data.current_price;
+                const quantity = parseFloat(row.cells[2].textContent);
+                const avgPrice = parseFloat(row.cells[3].textContent.replace('$', ''));
+                
+                const totalCost = quantity * avgPrice;
+                const currentValue = quantity * currentPrice;
+                const profitLoss = currentValue - totalCost;
+                const profitLossPercent = (profitLoss / totalCost) * 100;
+                
+                currentPriceCell.textContent = `$${currentPrice.toFixed(2)}`;
+                
+                const profitLossText = `${profitLoss >= 0 ? '+' : ''}$${profitLoss.toFixed(2)} (${profitLossPercent >= 0 ? '+' : ''}${profitLossPercent.toFixed(2)}%)`;
+                profitLossCell.textContent = profitLossText;
+                profitLossCell.className = `profit-loss ${profitLoss >= 0 ? 'text-success' : 'text-danger'}`;
+            })
+            .catch(error => {
+                console.error('Error fetching stock data:', error);
+                currentPriceCell.textContent = 'שגיאה';
+                profitLossCell.textContent = 'שגיאה';
+            });
+    });
+}
+
+// Update data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updatePortfolioData();
+    
+    // Update every 30 seconds
+    setInterval(updatePortfolioData, 30000);
+});
+</script>
+{% endblock %}
